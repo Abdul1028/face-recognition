@@ -184,6 +184,141 @@
 #
 # if __name__ == "__main__":
 #     main()
+#
+# import csv
+# import os
+# import datetime
+# import time
+# import cv2
+# import numpy as np
+# import pandas as pd
+# import streamlit as st
+# from PIL import Image
+#
+# def TakeImages(Id, name):
+#     if(Id and name):
+#         cam = cv2.VideoCapture(0)
+#         harcascadePath = "haarcascade_frontalface_default.xml"
+#         detector = cv2.CascadeClassifier(harcascadePath)
+#         sampleNum = 0
+#         image_placeholder = st.empty()
+#         while(True):
+#             ret, img = cam.read()
+#             gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+#             faces = detector.detectMultiScale(gray, 1.3, 5)
+#             for (x, y, w, h) in faces:
+#                 cv2.rectangle(img, (x, y), (x+w, y+h), (255, 0, 0), 2)
+#                 sampleNum += 1
+#                 cv2.imwrite("TrainingImage\\"+name + "."+Id + '.' + str(sampleNum) + ".jpg", gray[y:y+h, x:x+w])
+#             image_placeholder.image(img, channels="BGR")
+#             if sampleNum > 100:
+#                 break
+#             if cv2.waitKey(1) & 0xFF == ord('q'):
+#                 break
+#         cam.release()
+#         cv2.destroyAllWindows()
+#         res = "Images Saved for ID : " + Id + " Name : " + name
+#         row = [Id, name]
+#         with open('EmployeeDetails\\EmployeeDetails.csv', 'a+') as csvFile:
+#             writer = csv.writer(csvFile)
+#             writer.writerow(row)
+#         st.success(res)
+#     else:
+#         if name.isalpha():
+#             st.error("Enter Numeric Id")
+#
+# def TrainImages():
+#     recognizer = cv2.face.LBPHFaceRecognizer_create()
+#     harcascadePath = "haarcascade_frontalface_default.xml"
+#     detector = cv2.CascadeClassifier(harcascadePath)
+#     faces, Id = getImagesAndLabels("TrainingImage")
+#     recognizer.train(faces, np.array(Id))
+#     recognizer.save("TrainingImageLabel\\Trainner.yml")
+#     st.success("Images Trained")
+#
+# def getImagesAndLabels(path):
+#     imagePaths = [os.path.join(path, f) for f in os.listdir(path)]
+#     faces = []
+#     Ids = []
+#     for imagePath in imagePaths:
+#         pilImage = Image.open(imagePath).convert('L')
+#         imageNp = np.array(pilImage, 'uint8')
+#         Id = int(os.path.split(imagePath)[-1].split(".")[1])
+#         faces.append(imageNp)
+#         Ids.append(Id)
+#     return faces, Ids
+#
+# def TrackImages():
+#     recognizer = cv2.face.LBPHFaceRecognizer_create()
+#     recognizer.read("TrainingImageLabel\\Trainner.yml")
+#     harcascadePath = "haarcascade_frontalface_default.xml"
+#     faceCascade = cv2.CascadeClassifier(harcascadePath)
+#     df = pd.read_csv("EmployeeDetails\\EmployeeDetails.csv")
+#     cam = cv2.VideoCapture(0)
+#     font = cv2.FONT_HERSHEY_SIMPLEX
+#     col_names = ['Id', 'Name', 'Date', 'Time']
+#     attendance = pd.DataFrame(columns=col_names)
+#     image_placeholder = st.empty()
+#     while True:
+#         ret, im = cam.read()
+#         gray = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
+#         faces = faceCascade.detectMultiScale(gray, 1.2, 5)
+#         for(x, y, w, h) in faces:
+#             cv2.rectangle(im, (x, y), (x+w, y+h), (225, 0, 0), 2)
+#             Id, conf = recognizer.predict(gray[y:y+h, x:x+w])
+#             if(conf < 50):
+#                 ts = time.time()
+#                 date = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d')
+#                 timeStamp = datetime.datetime.fromtimestamp(ts).strftime('%H:%M:%S')
+#                 aa = df.loc[df['Id'] == Id]['Name'].values[0]
+#                 tt = str(Id) + "-" + aa
+#                 attendance.loc[len(attendance)] = [Id, aa, date, timeStamp]
+#             else:
+#                 Id = 'Unknown'
+#                 tt = str(Id)
+#             if(conf > 75):
+#                 noOfFile = len(os.listdir("ImagesUnknown"))+1
+#                 cv2.imwrite("ImagesUnknown\\Image"+str(noOfFile) + ".jpg", im[y:y+h, x:x+w])
+#             cv2.putText(im, str(tt), (x, y+h), font, 1, (255, 255, 255), 2)
+#         attendance = attendance.drop_duplicates(subset=['Id'], keep='first')
+#         image_placeholder.image(im, channels="BGR")
+#         if cv2.waitKey(1) & 0xFF == ord('q'):
+#             break
+#     ts = time.time()
+#     date = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d')
+#     timeStamp = datetime.datetime.fromtimestamp(ts).strftime('%H:%M:%S')
+#     Hour, Minute, Second = timeStamp.split(":")
+#     fileName = "Attendance\\Attendance_"+date+"_"+Hour+"-"+Minute+"-"+Second+".csv"
+#     attendance.to_csv(fileName, index=False)
+#     cam.release()
+#     cv2.destroyAllWindows()
+#     st.success("Attendance Tracked")
+#     st.dataframe(attendance)
+#
+# def main():
+#     st.title("Student Attendance System")
+#
+#     choice = st.sidebar.selectbox("Choose Functionality", ["Take Image", "Train Image", "Track Attendance"])
+#
+#     if choice == "Take Image":
+#         st.header("Take Image")
+#         l1 = st.text_input("Enrollment Number")
+#         l2 = st.text_input("Name")
+#         if st.button("Capture Images"):
+#             TakeImages(l1, l2)
+#
+#     elif choice == "Train Image":
+#         st.header("Train Image")
+#         if st.button("Train Images"):
+#             TrainImages()
+#
+#     elif choice == "Track Attendance":
+#         st.header("Track Attendance")
+#         TrackImages()
+#
+# if __name__ == "__main__":
+#     main()
+
 
 import csv
 import os
@@ -194,32 +329,55 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 from PIL import Image
+from streamlit_webrtc import webrtc_streamer, VideoTransformerBase,RTCConfiguration
+def save_uploaded_file(uploaded_file, folder):
+    try:
+        with open(os.path.join(folder, uploaded_file.name), "wb") as f:
+            f.write(uploaded_file.getbuffer())
+        return True
+    except Exception as e:
+        print(e)
+        return False
 
-def TakeImages(Id, name):
-    if(Id and name):
-        cam = cv2.VideoCapture(0)
-        harcascadePath = "haarcascade_frontalface_default.xml"
-        detector = cv2.CascadeClassifier(harcascadePath)
-        sampleNum = 0
-        image_placeholder = st.empty()
-        while(True):
-            ret, img = cam.read()
-            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-            faces = detector.detectMultiScale(gray, 1.3, 5)
-            for (x, y, w, h) in faces:
-                cv2.rectangle(img, (x, y), (x+w, y+h), (255, 0, 0), 2)
-                sampleNum += 1
-                cv2.imwrite("TrainingImage\\"+name + "."+Id + '.' + str(sampleNum) + ".jpg", gray[y:y+h, x:x+w])
-            image_placeholder.image(img, channels="BGR")
-            if sampleNum > 100:
-                break
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                break
-        cam.release()
-        cv2.destroyAllWindows()
-        res = "Images Saved for ID : " + Id + " Name : " + name
+
+class FaceDetection():
+    def __init__(self):
+        self.harcascadePath = "haarcascade_frontalface_default.xml"
+        self.detector = cv2.CascadeClassifier(self.harcascadePath)
+        self.sampleNum = 0
+        self.Id = None
+        self.name = None
+        self.folder = "TrainingImage"
+
+    def transform(self, frame):
+        img = frame.to_ndarray(format="bgr24")
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        faces = self.detector.detectMultiScale(gray, 1.3, 5)
+        for (x, y, w, h) in faces:
+            cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
+            self.sampleNum += 1
+            cv2.imwrite(os.path.join(self.folder, f"{self.name}.{self.Id}.{self.sampleNum}.jpg"),
+                        gray[y:y + h, x:x + w])
+            # if self.sampleNum > 100:
+            #     break
+        return img
+
+
+def take_images(Id, name):
+    if Id and name:
+        st.info("Capturing images from webcam")
+        transformer = FaceDetection()
+        transformer.Id = Id
+        transformer.name = name
+        webrtc_streamer(key="key", video_processor_factory=FaceDetection,
+                        rtc_configuration=RTCConfiguration(
+                            {"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]}
+                        )
+                        )
+
+        res = f"Images Saved for ID : {Id} Name : {name}"
         row = [Id, name]
-        with open('EmployeeDetails\\EmployeeDetails.csv', 'a+') as csvFile:
+        with open('EmployeeDetails/EmployeeDetails.csv', 'a+') as csvFile:
             writer = csv.writer(csvFile)
             writer.writerow(row)
         st.success(res)
@@ -227,16 +385,18 @@ def TakeImages(Id, name):
         if name.isalpha():
             st.error("Enter Numeric Id")
 
-def TrainImages():
+
+def train_images():
     recognizer = cv2.face.LBPHFaceRecognizer_create()
     harcascadePath = "haarcascade_frontalface_default.xml"
     detector = cv2.CascadeClassifier(harcascadePath)
-    faces, Id = getImagesAndLabels("TrainingImage")
+    faces, Id = get_images_and_labels("TrainingImage")
     recognizer.train(faces, np.array(Id))
-    recognizer.save("TrainingImageLabel\\Trainner.yml")
+    recognizer.save("TrainingImageLabel/Trainner.yml")
     st.success("Images Trained")
 
-def getImagesAndLabels(path):
+
+def get_images_and_labels(path):
     imagePaths = [os.path.join(path, f) for f in os.listdir(path)]
     faces = []
     Ids = []
@@ -248,25 +408,27 @@ def getImagesAndLabels(path):
         Ids.append(Id)
     return faces, Ids
 
-def TrackImages():
+
+def track_images():
     recognizer = cv2.face.LBPHFaceRecognizer_create()
-    recognizer.read("TrainingImageLabel\\Trainner.yml")
+    recognizer.read("TrainingImageLabel/Trainner.yml")
     harcascadePath = "haarcascade_frontalface_default.xml"
     faceCascade = cv2.CascadeClassifier(harcascadePath)
-    df = pd.read_csv("EmployeeDetails\\EmployeeDetails.csv")
+    df = pd.read_csv("EmployeeDetails/EmployeeDetails.csv")
     cam = cv2.VideoCapture(0)
     font = cv2.FONT_HERSHEY_SIMPLEX
     col_names = ['Id', 'Name', 'Date', 'Time']
     attendance = pd.DataFrame(columns=col_names)
     image_placeholder = st.empty()
+
     while True:
         ret, im = cam.read()
         gray = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
         faces = faceCascade.detectMultiScale(gray, 1.2, 5)
-        for(x, y, w, h) in faces:
-            cv2.rectangle(im, (x, y), (x+w, y+h), (225, 0, 0), 2)
-            Id, conf = recognizer.predict(gray[y:y+h, x:x+w])
-            if(conf < 50):
+        for (x, y, w, h) in faces:
+            cv2.rectangle(im, (x, y), (x + w, y + h), (225, 0, 0), 2)
+            Id, conf = recognizer.predict(gray[y:y + h, x:x + w])
+            if conf < 50:
                 ts = time.time()
                 date = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d')
                 timeStamp = datetime.datetime.fromtimestamp(ts).strftime('%H:%M:%S')
@@ -276,10 +438,10 @@ def TrackImages():
             else:
                 Id = 'Unknown'
                 tt = str(Id)
-            if(conf > 75):
-                noOfFile = len(os.listdir("ImagesUnknown"))+1
-                cv2.imwrite("ImagesUnknown\\Image"+str(noOfFile) + ".jpg", im[y:y+h, x:x+w])
-            cv2.putText(im, str(tt), (x, y+h), font, 1, (255, 255, 255), 2)
+            if conf > 75:
+                noOfFile = len(os.listdir("ImagesUnknown")) + 1
+                cv2.imwrite(f"ImagesUnknown/Image{noOfFile}.jpg", im[y:y + h, x:x + w])
+            cv2.putText(im, str(tt), (x, y + h), font, 1, (255, 255, 255), 2)
         attendance = attendance.drop_duplicates(subset=['Id'], keep='first')
         image_placeholder.image(im, channels="BGR")
         if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -288,12 +450,13 @@ def TrackImages():
     date = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d')
     timeStamp = datetime.datetime.fromtimestamp(ts).strftime('%H:%M:%S')
     Hour, Minute, Second = timeStamp.split(":")
-    fileName = "Attendance\\Attendance_"+date+"_"+Hour+"-"+Minute+"-"+Second+".csv"
+    fileName = f"Attendance/Attendance_{date}_{Hour}-{Minute}-{Second}.csv"
     attendance.to_csv(fileName, index=False)
     cam.release()
     cv2.destroyAllWindows()
     st.success("Attendance Tracked")
     st.dataframe(attendance)
+
 
 def main():
     st.title("Student Attendance System")
@@ -305,16 +468,17 @@ def main():
         l1 = st.text_input("Enrollment Number")
         l2 = st.text_input("Name")
         if st.button("Capture Images"):
-            TakeImages(l1, l2)
+            take_images(l1, l2)
 
     elif choice == "Train Image":
         st.header("Train Image")
         if st.button("Train Images"):
-            TrainImages()
+            train_images()
 
     elif choice == "Track Attendance":
         st.header("Track Attendance")
-        TrackImages()
+        track_images()
+
 
 if __name__ == "__main__":
     main()
