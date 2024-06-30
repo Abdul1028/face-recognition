@@ -215,6 +215,17 @@ def main():
 
     if choice == "Take Image":
         st.header("Take Image")
+
+        st.info("Steps to record face data")
+
+        with st.expander("HOW TO USE"):
+            st.write("Click on start")
+            st.write("if asked for permissions accept")
+            st.write("App will start detecting your face and draw a rectangle over it")
+            st.write("You can even change the camera and microphone input by clicking select device")
+            st.write("When the green rectangle disappears you can simply stop")
+            st.write("You are good to train your model now")
+
         enrollment_num = st.text_input("Enrollment Number")
         name = st.text_input("Name")
         if st.button("Capture Images"):
@@ -244,12 +255,23 @@ def main():
 
     elif choice == "Train Image":
             st.header("Train Image")
+            st.write("No need to train the model if once trained!!")
+            st.info("Only train when added new student")
             if st.button("Train Images"):
                 trainModel("TrainingImage","TrainingImageLabel/Trainner.yml")
 
 
     elif choice == "Track Attendance":
         st.header("Track Attendance")
+
+        with st.expander("HOW TO USE"):
+            st.write("Click on start")
+            st.write("if asked for permissions accept")
+            st.write("App will start detecting your face and mark your attendace")
+            st.write("Once added the attendance it will show you a prompt saying attendace marked you can leave !")
+            st.write("You can use the stop button now to get back")
+            st.write("Verify your attendance in the sheet")
+
         if st.button("Attend"):
             st.session_state.mark = True
 
