@@ -61,7 +61,7 @@
 #         if(name.isalpha()):
 #             res = "Enter Numeric Id"
 #             st.toast(res)
-#
+
 #
 # def TrainImages():
 #     recognizer = cv2.face_LBPHFaceRecognizer.create()
@@ -154,7 +154,7 @@
 #     # print(attendance)
 #     res = attendance
 #     st.toast(res)
-#
+
 # def main():
 #     st.title("Student Attendance System")
 #
@@ -394,6 +394,7 @@ def train_images():
     recognizer.train(faces, np.array(Id))
     recognizer.save("TrainingImageLabel/Trainner.yml")
     st.success("Images Trained")
+    st.toast("Images Trained")
 
 
 def get_images_and_labels(path):
@@ -478,6 +479,7 @@ def main():
     elif choice == "Track Attendance":
         st.header("Track Attendance")
         track_images()
+
 
 
 if __name__ == "__main__":
